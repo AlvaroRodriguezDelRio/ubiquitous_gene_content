@@ -4,7 +4,7 @@ import numpy as np
 
 lin2num = Counter()
 genome2t = {}
-for line in open(sys.argv[1]):
+for line in open('genome2taxonomy.tab'):
     genome,tax = list(map(str.strip,line.split('\t')))
     genome2t[genome] = tax
     genome2t[genome.split('.')[0]] = tax
@@ -18,7 +18,7 @@ for line in open(sys.argv[1]):
 # parse emapper annotations
 lin2db2annot = defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 db2annot2genomes = defaultdict(lambda:defaultdict(lambda:set()))
-for line in open(sys.argv[2]):
+for line in open('emapper_annotations.tab'):
     if line.startswith('#'):
         continue
 

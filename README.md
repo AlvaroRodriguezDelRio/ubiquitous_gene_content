@@ -2,5 +2,5 @@
 Code developed for exploring the gene content of ubiquitous soil prokaryotic species
 
 
-```eqwerwe``` > script for calculating gene coverage and specificity per lineage 
-```statistics.r``` > script used for performing the statistical analysis of the paper
+- ```gene_coverage_specificity.py``` > script for calculating gene coverage and specificity per lineage 
+- ```statistics.r``` > script used for performing the statistical analysis of the paper

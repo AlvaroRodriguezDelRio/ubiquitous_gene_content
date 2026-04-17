@@ -13,40 +13,34 @@ library(purrr)
 
 
 
-# load n genomes per lin
+# get ko conservation per lineage 
+# this table also includes number of detections per lineage 
+abs = read.table("ko_conservation.tab",sep ='\t',header = F)
+names(abs) = c("samples","totsamples","tip","ko","cons","gene","desc","general")
+
+# get lineage ubiquity
+abs$ubiq = abs$samples / abs$totsamples
+
+# load n genomes per linenage
 n_genomes_per_lin = read.table("n_genomes_per_lin.tab",sep = '\t')
 names(n_genomes_per_lin) = c("tip","n_genomes")
 head(n_genomes_per_lin)
 
-# ####
-# # get ko cov per lin
-# ####
-
-abs = read.table("ko_list.cov_sp_f1.all_lins.0s.tab",sep ='\t',header = F)
-names(abs) = c("samples","totsamples","tip","ko","cons","gene","desc","general")
-
-# get ubiquity
-abs$ubiq = abs$samples / abs$totsamples
-
-#####
-# join n genomes 
-####
-
 abs = abs %>%
   left_join(n_genomes_per_lin,by = "tip")
 
-# filter n genomes > 10
+# filter n genomes  > 10
 nrow(abs)
 abs = abs %>%
   filter(n_genomes >10)
 
-# filter genes
+# filter genes to analyze
 abs = abs %>%
   filter(!general %in% c('Dormancy','Nitrate transporter','Nitrilase','Organic N metabolism',
                          'Organic N metabolism / Ammonification','Photosynthesis',
                          'Photosynthesis - antenna proteins'))
 
-# complete missing lin - gene combs
+# complete missing lin - gene combinations
 head(abs)
 abs_comp = abs %>%
   group_by(samples,totsamples,dn,ko,desc,general,ubiq,f2,n_genomes) %>%
@@ -71,7 +65,6 @@ ref_genomes = ref_genomes %>%
 abs = abs %>%
   left_join(ref_genomes,by = 'tip')
 
-
 #####
 # join genome completeness and contamination, per lineage
 #####
@@ -91,8 +84,6 @@ comcont = comcont %>%
 comcont = comcont %>%
   dplyr::select(tip,mean_compl,mean_cont)
 
-
-# join with abs
 abs = abs %>%
   left_join(comcont,by = 'tip')
 
@@ -101,14 +92,14 @@ abs$cons = as.numeric(abs$cons)
 abs$cons_corrected = abs$cons * (100 / abs$mean_compl)
 
 
-# scale to 1, per ko
+# scale gene conservation to 1
 abs = abs %>%
   group_by(ko) %>%
   mutate(max_cons_corr = max(cons_corrected)) %>%
   mutate(cons_corrected = cons_corrected / max_cons_corr) %>%
   dplyr::select(!max_cons_corr)
 
-# GFC
+# GFC calculation 
 abs$f2_corrected = 2 * (abs$cons_corrected *abs$ubiq) / (abs$cons_corrected + abs$ubiq)
 
 ####

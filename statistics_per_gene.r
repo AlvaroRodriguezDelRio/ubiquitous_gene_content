@@ -58,8 +58,7 @@ abs = abs %>%
                                   .default = 'no'))
 
 
-# more coverage in uncultivated 
-# cov corrected
+# more gene conservation in uncultivated 
 abs %>% 
   filter(grepl('g__',tip) & !grepl('s__',tip)) %>% 
   filter(gene %in% c("nifH","nifD","nifK","anfG",
@@ -84,8 +83,7 @@ abs %>%
   print(n = 100) %>% 
   filter(mean_cult < mean_uncult)
 
-# more coverage in cultivated 
-# cov corrected
+# more gene conservation in cultivated 
 abs %>% 
   filter(grepl('g__',tip) & !grepl('s__',tip)) %>% 
   filter(gene %in% c("nifH","nifD","nifK","anfG",
@@ -111,27 +109,8 @@ abs %>%
   print(n = 20)
 
 
-
-ggplot(abs %>% 
-         filter(grepl('g__',tip) & !grepl('s__',tip)) %>% 
-         filter(gene %in% c("nifH","nifD","nifK","anfG",
-                            "pmo-amoA","pmo-amoB","pmo-amoC",
-                            "narG, narZ, nxrA","narH, narY, nxrB","napA","napB",
-                            "norB","norC","NosZ","nirS","nirK",
-                            "rbcL","rbcS","prkB",
-                            "K18603","K18604","abfD","aclA","aclB",
-                            "mcrA","mcrB","mcrC","mcrD","fwdA","fwdB","fwdC",
-                            "mmoX","mmoC","mmoY","mmoZ","pmo-amoA","pmo-amoB","pmo-amoC",
-                            "coxA","coxB","coxC",
-                            "coxS","coxM","coxS")))+
-  geom_boxplot(aes(x = uncultivated, y = conservation_corrected))+
-  facet_wrap(~gene)
-
-
-
-
 ######
-# corr genes // ubiq
+# corr of gene conservation with lineage ubiquity
 ######
 
 head (abs)
@@ -829,7 +808,7 @@ head(abs)
 
 #################
 ##########
-# Taxa involved in many 
+# Taxa ranked among the hihghest 100 in many routes
 ##########
 #################
 

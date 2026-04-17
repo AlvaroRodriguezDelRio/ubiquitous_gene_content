@@ -123,4 +123,4 @@ names(data_export) = c("ubiquity",'taxa','ko','conservation','gene code','gene d
                        'conservation_corrected_by_completness','GFC')
 
 
-write.csv(data_export,"ko_TGR.v3.csv")
+write.csv(data_export,"ko_TGR.csv")

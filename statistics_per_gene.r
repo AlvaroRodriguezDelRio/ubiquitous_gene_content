@@ -18,7 +18,7 @@ library(purrr)
 ####
 ##############
 
-abs = read.csv('ko_TGR.v3.csv')
+abs = read.csv('ko_TGR.csv')
 head(abs)
 
 ############

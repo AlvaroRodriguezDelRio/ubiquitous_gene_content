@@ -19,14 +19,20 @@ library(purrr)
 ##############
 
 abs = read.csv('ko_TGR.csv')
-head(abs)
+
+# declare uncultivated taxa as those with no reference genomes
+abs = abs %>% 
+  mutate(uncultivated = case_when(proportion_GB_genomes == 1 ~'yes',
+                                  .default = 'no'))
+
 
 ############
-# corrr genes // perc refseq
+# correlation KO conservation per taxa // percentage genomes in refseq
 ############
 
 head (abs)
-da = abs %>% 
+abs %>% 
+  filter(n_genomes > 10) %>% 
   group_by(gene,general) %>% 
   filter(gene %in% c("nifH","nifD","nifK","anfG",
                      "pmo-amoA","pmo-amoB","pmo-amoC",
@@ -45,22 +51,10 @@ da = abs %>%
   filter(p < 0.01 & (c) > 0) %>% 
   print(n = 200)
 
-ggplot(abs %>% 
-         filter(gene %in% da$gene) %>% 
-         filter(!grepl('c__',tip)))+
-  geom_hex(aes(x = proportion_GB_genomes,y = cov))+
-  geom_smooth(aes(x = proportion_GB_genomes,y = cov),method = 'lm')+
-  facet_grid(~gene)
-
-
-abs = abs %>% 
-  mutate(uncultivated = case_when(proportion_GB_genomes == 1 ~'yes',
-                                  .default = 'no'))
-
-
-# more gene conservation in uncultivated 
+# Wilcoxon test - get KOs with higher gene conservation in uncultivated genera
 abs %>% 
-  filter(grepl('g__',tip) & !grepl('s__',tip)) %>% 
+  filter(n_genomes > 10) %>% 
+  filter(grepl("g__",tip) & !grepl("s__",tip)) %>% 
   filter(gene %in% c("nifH","nifD","nifK","anfG",
                      "pmo-amoA","pmo-amoB","pmo-amoC",
                      "narG, narZ, nxrA","narH, narY, nxrB","napA","napB",
@@ -83,9 +77,10 @@ abs %>%
   print(n = 100) %>% 
   filter(mean_cult < mean_uncult)
 
-# more gene conservation in cultivated 
+# Wilcoxon test - get KOs with lower gene conservation in uncultivated genera
 abs %>% 
-  filter(grepl('g__',tip) & !grepl('s__',tip)) %>% 
+  filter(n_genomes > 10) %>% 
+  filter(grepl("g__",tip) & !grepl("s__",tip)) %>% 
   filter(gene %in% c("nifH","nifD","nifK","anfG",
                      "pmo-amoA","pmo-amoB","pmo-amoC",
                      "narG, narZ, nxrA","narH, narY, nxrB","napA","napB",
@@ -108,9 +103,8 @@ abs %>%
   arrange((p)) %>% 
   print(n = 20)
 
-
 ######
-# corr of gene conservation with lineage ubiquity
+# correlations between gene conservation in each genus and genus ubiquity
 ######
 
 head (abs)
@@ -142,30 +136,6 @@ da = abs %>%
 
 da
 
-
-abs %>% 
-  filter(n_genomes > 10) %>% 
-  filter(gene %in% c("nifH","nifD","nifK","anfG",
-                     "pmo-amoA","pmo-amoB","pmo-amoC",
-                     "narG, narZ, nxrA","narH, narY, nxrB","napA","napB",
-                     "norB","norC","NosZ","nirS","nirK",
-                     "rbcL","rbcS","prkB",
-                     "K18603","K18604","abfD","aclA","aclB",
-                     "mcrA","mcrB","mcrC","mcrD","fwdA","fwdB","fwdC",
-                     "mmoX","mmoC","mmoY","mmoZ","pmo-amoA","pmo-amoB","pmo-amoC",
-                     "coxA","coxB","coxC",
-                     "coxS","coxM","coxS",
-                     'phoA',"qcd","soxB","dsrA",
-                     "K01179",
-                     "CELB",
-                     "bcsZ",
-                     "CBH1",
-                     "CBH2", 'cysM', 'cysK')) %>% 
-  filter(grepl("g__",tip) & !grepl("s__",tip)) %>% 
-  group_by(gene) %>% 
-  summarise(p = cor.test(samples,conservation_corrected,method = 'spearman')$p.value,
-            c = cor.test(samples,conservation_corrected,method = 'spearman')$estimate) %>% 
-  arrange(-c)
 
 ggplot(abs %>% 
          filter(gene %in% c("nifH","nifD","nifK","anfG",
@@ -202,15 +172,17 @@ ggplot(abs %>%
   ) 
 
 
-
+###########
+######
+# Rankings, per gene / gene pathway
+######
+############
 
 #######
 # Carbon fixation
 ######
 
-head(abs)
-
-# rbcLS and prkb, cons, phylum, conservation
+# rbcLS and prkb, conservation at the phylum level
 abs %>% 
   filter(n_genomes > 10) %>% 
   filter(grepl("Carbon fixataion",general)) %>%
@@ -224,7 +196,7 @@ abs %>%
   print(n = 20) 
 
 
-# rbcl, all, GFC
+# rbcl,  GFC ranking
 abs %>% 
   filter(n_genomes>10) %>% 
   filter(gene == 'rbcL') %>%
@@ -237,7 +209,7 @@ abs %>%
   print(n = 20)
 
 
-# rbcl + rbcs, GFC
+# rbcl + rbcs, GFC ranking
 abs %>% 
   filter(n_genomes>10) %>% 
   filter(!grepl("Photosynthesis",general)) %>%
@@ -251,13 +223,6 @@ abs %>%
   unique() %>% 
   arrange(desc(n)) %>% 
   print(n = 20)
-
-
-abs %>% 
-  filter(gene %in% c('rbcL','rbcS')) %>%
-  filter(tip == 'd__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__CADCVQ01') %>% 
-  dplyr::select(conservation_corrected,samples,totsamples, gene, ubiq)
-
 
 
 ########
